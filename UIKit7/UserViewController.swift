@@ -9,7 +9,8 @@ import UIKit
 import SnapKit
 
 class UserViewController: UIViewController {
-
+    let vm = UserViewModel()
+    
     private let tableView: UITableView = {
         let table = UITableView()
         table.rowHeight = 60
@@ -55,8 +56,6 @@ class UserViewController: UIViewController {
         return stackView
     }()
     
-    var list: [Person] = []
-     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -64,29 +63,17 @@ class UserViewController: UIViewController {
         setupTableView()
         setupActions()
     }
-     
-    
     
     @objc private func loadButtonTapped() {
-        list = [
-            Person(name: "James", age: Int.random(in: 20...70)),
-            Person(name: "Mary", age: Int.random(in: 20...70)),
-            Person(name: "John", age: Int.random(in: 20...70)),
-            Person(name: "Patricia", age: Int.random(in: 20...70)),
-            Person(name: "Robert", age: Int.random(in: 20...70))
-        ]
-        tableView.reloadData()
+        vm.action = .load
     }
     
     @objc private func resetButtonTapped() {
-        list.removeAll()
-        tableView.reloadData()
+        vm.action = .reset
     }
     
     @objc private func addButtonTapped() {
-        let jack = Person(name: "Jack", age: Int.random(in: 1...100))
-        list.append(jack)
-        tableView.reloadData()
+        vm.action = .add("Song", Int.random(in: 1...100))
     }
 }
 
@@ -95,9 +82,7 @@ extension UserViewController {
         view.backgroundColor = .white
         title = "Person List"
         
-        [buttonStackView, tableView].forEach {
-            view.addSubview($0)
-        }
+        [buttonStackView, tableView].forEach(view.addSubview)
     }
     
     private func setupConstraints() {
@@ -120,21 +105,33 @@ extension UserViewController {
     }
     
     private func setupActions() {
+        vm.reload = tableView.reloadData
+        
         loadButton.addTarget(self, action: #selector(loadButtonTapped), for: .touchUpInside)
         resetButton.addTarget(self, action: #selector(resetButtonTapped), for: .touchUpInside)
         addButton.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
     }
 }
- 
+
 extension UserViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return list.count
+        return vm.list.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "PersonCell", for: indexPath)
-        let person = list[indexPath.row]
-        cell.textLabel?.text = "\(person.name), \(person.age)세"
+        cell.textLabel?.text = vm.infomation(rowAt: indexPath.row)
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        return .delete
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            self.vm.action = .remove(indexPath.row)
+//            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
     }
 }

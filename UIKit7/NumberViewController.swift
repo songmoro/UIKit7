@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 class NumberViewController: UIViewController {
+    let vm = NumberViewModel()
 
     private let amountTextField: UITextField = {
         let textField = UITextField()
@@ -32,40 +33,10 @@ class NumberViewController: UIViewController {
     }
  
     @objc private func amountChanged() {
-        print(#function)
-        //1) 옵셔널
-        guard let text = amountTextField.text else {
-            formattedAmountLabel.text = ""
-            formattedAmountLabel.textColor = .red
-            return
-        }
+        vm.inputText = amountTextField.text
         
-        //2) Empty
-        if text.isEmpty {
-            formattedAmountLabel.text = "값을 입력해주세요"
-            formattedAmountLabel.textColor = .red
-            return
-        }
-        
-        //3) 숫자 여부
-        guard let num = Int(text) else {
-            formattedAmountLabel.text = "숫자만 입력해주세요"
-            formattedAmountLabel.textColor = .red
-            return
-        }
-        
-        //4) 0 - 1,000,000
-        if num > 0, num <= 1000000 {
-            
-            let format = NumberFormatter()
-            format.numberStyle = .decimal
-            let result = format.string(from: num as NSNumber)!
-            formattedAmountLabel.text = "₩" + result
-            formattedAmountLabel.textColor = .blue
-        } else {
-            formattedAmountLabel.text = "백만원 이하를 입력해주세요"
-            formattedAmountLabel.textColor = .red
-        }
+        amountTextField.text = vm.output.0
+        amountTextField.textColor = vm.output.1
     }
 }
 
