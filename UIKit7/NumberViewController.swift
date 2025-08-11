@@ -7,9 +7,11 @@
 
 import UIKit
 import SnapKit
+import Combine
 
 class NumberViewController: UIViewController {
-    let vm = NumberViewModel()
+    private var cancellables = Set<AnyCancellable>()
+    private let vm = NumberViewModel()
 
     private let amountTextField: UITextField = {
         let textField = UITextField()
@@ -27,16 +29,25 @@ class NumberViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        bind()
         configureUI()
         configureConstraints()
-        configureActions()
     }
- 
-    @objc private func amountChanged() {
-        vm.inputText = amountTextField.text
+    
+    private func bind() {
+        vm.outputText.bind { [weak self] in
+            self?.formattedAmountLabel.text = $0
+        }
         
-        amountTextField.text = vm.output.0
-        amountTextField.textColor = vm.output.1
+        vm.outputColor.bind { [weak self] in
+            self?.formattedAmountLabel.textColor = $0
+        }
+        
+        amountTextField.publsher(.editingChanged)
+            .compactMap { $0 as? UITextField }
+            .compactMap(\.text)
+            .assign(to: \.vm.text.value, on: self)
+            .store(in: &cancellables)
     }
 }
 
@@ -60,9 +71,4 @@ extension NumberViewController {
             make.left.right.equalTo(amountTextField)
         }
     }
-
-    private func configureActions() {
-        amountTextField.addTarget(self, action: #selector(amountChanged), for: .editingChanged)
-    }
-
 }

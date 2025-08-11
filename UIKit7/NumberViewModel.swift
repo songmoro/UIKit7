@@ -9,13 +9,21 @@ import Foundation
 import UIKit
 
 class NumberViewModel {
-    var inputText: String? = "" {
-        willSet {
-            output = validate(inputText)
-        }
+    var text: Observable<String?> = .init(value: "")
+    var outputText: Observable<String> = .init(value: "")
+    var outputColor: Observable<UIColor> = .init(value: .clear)
+    
+    init() {
+        bind()
     }
     
-    var output: (String, UIColor) = ("", .clear)
+    private func bind() {
+        text.bind { [weak self] in
+            guard let output = self?.validate($0) else { return }
+            self?.outputText.value = output.0
+            self?.outputColor.value = output.1
+        }
+    }
     
     private func validate(_ text: String?) -> (String, UIColor) {
         guard let text else { return ("", .red) }

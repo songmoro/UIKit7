@@ -7,9 +7,16 @@
 
 import UIKit
 import SnapKit
+import Combine
 
 class LoginViewController: UIViewController {
- 
+    private var cancellables = Set<AnyCancellable>()
+    private let viewModel = LoginViewModel()
+    
+    deinit {
+        print(#function, "1")
+    }
+    
     private let idTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "아이디"
@@ -39,76 +46,75 @@ class LoginViewController: UIViewController {
         button.layer.cornerRadius = 5
         return button
     }()
-       
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        bind()
         configureUI()
         configureConstraints()
-        configureActions()
     }
     
-    @objc private func textFieldDidChange() {
-        print(#function)
-        guard let id = idTextField.text, let pw = passwordTextField.text else {
-            validationLabel.text = "nil입니다"
-            loginButton.isEnabled = false
-            return
-        }
+    private func bind() {
+        idTextField.publsher(.editingChanged)
+            .compactMap { $0 as? UITextField }
+            .map(\.text)
+            .sink { [weak self] in
+                self?.viewModel.idText = $0
+            }
+            .store(in: &cancellables)
         
-        if id.count >= 4 && pw.count >= 4 {
-            validationLabel.text = "잘 했어요"
-            loginButton.isEnabled = true
-        } else {
-            validationLabel.text = "아이디, 비밀번호 4자리 이상입니다."
-            loginButton.isEnabled = false
-        }
-    } 
-
-    @objc private func loginButtonTapped() {
-        print(#function)
+        passwordTextField.publsher(.editingChanged)
+            .compactMap { $0 as? UITextField }
+            .map(\.text)
+            .sink { [weak self] in
+                self?.viewModel.pwdText = $0
+            }
+            .store(in: &cancellables)
+        
+        loginButton.publsher(.touchUpInside)
+            .compactMap { $0 as? UIButton }
+            .sink { _ in
+                print("로그인")
+            }
+            .store(in: &cancellables)
+        
+        viewModel.output
+            .sink { [weak self] in
+                self?.validationLabel.text = $0.0
+                self?.validationLabel.textColor = $0.1 ? .systemGreen : .systemRed
+                self?.loginButton.isEnabled = $0.1
+            }
+            .store(in: &cancellables)
     }
-
-    
 }
 
 extension LoginViewController {
-    
     private func configureUI() {
         view.backgroundColor = .white
-        view.addSubview(idTextField)
-        view.addSubview(passwordTextField)
-        view.addSubview(validationLabel)
-        view.addSubview(loginButton)
+        [idTextField, passwordTextField, validationLabel, loginButton].forEach(view.addSubview)
     }
-
+    
     private func configureConstraints() {
         idTextField.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(50)
             make.left.right.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
-
+        
         passwordTextField.snp.makeConstraints { make in
             make.top.equalTo(idTextField.snp.bottom).offset(20)
             make.left.right.height.equalTo(idTextField)
         }
-
+        
         validationLabel.snp.makeConstraints { make in
             make.top.equalTo(passwordTextField.snp.bottom).offset(10)
             make.left.right.equalTo(idTextField)
         }
-
+        
         loginButton.snp.makeConstraints { make in
             make.top.equalTo(validationLabel.snp.bottom).offset(30)
             make.left.right.equalTo(idTextField)
             make.height.equalTo(50)
         }
     }
-
-    private func configureActions() {
-        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-        idTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        passwordTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-    }
-
 }
