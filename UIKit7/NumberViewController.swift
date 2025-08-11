@@ -43,7 +43,7 @@ class NumberViewController: UIViewController {
             self?.formattedAmountLabel.textColor = $0
         }
         
-        amountTextField.publsher(.editingChanged)
+        amountTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
             .compactMap(\.text)
             .assign(to: \.vm.text.value, on: self)

@@ -55,7 +55,7 @@ class LoginViewController: UIViewController {
     }
     
     private func bind() {
-        idTextField.publsher(.editingChanged)
+        idTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
             .map(\.text)
             .sink { [weak self] in
@@ -63,7 +63,7 @@ class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        passwordTextField.publsher(.editingChanged)
+        passwordTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
             .map(\.text)
             .sink { [weak self] in
@@ -71,7 +71,7 @@ class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
         
-        loginButton.publsher(.touchUpInside)
+        loginButton.publisher(.touchUpInside)
             .compactMap { $0 as? UIButton }
             .sink { _ in
                 print("로그인")
