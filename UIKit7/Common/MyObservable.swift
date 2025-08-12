@@ -9,15 +9,25 @@ import Foundation
 
 @propertyWrapper
 final class MyObservable<T> {
+    struct MyPublisher {
+        private let observable: MyObservable<T>
+        
+        init(observable: MyObservable<T>) {
+            self.observable = observable
+        }
+        
+        func bind(handler: @escaping (T) -> Void) {
+            handler(observable.value)
+            self.observable.handler = handler
+        }
+    }
+    
     private var handler: ((T) -> Void)?
     private var value: T
     
-    var projectedValue: MyObservable<T> {
+    var projectedValue: MyObservable<T>.MyPublisher {
         get {
-            return self
-        }
-        set {
-            self.wrappedValue = newValue.value
+            MyPublisher(observable: self)
         }
     }
     
@@ -33,10 +43,5 @@ final class MyObservable<T> {
     
     init(value: T) {
         self.value = value
-    }
-    
-    func bind(handler: @escaping (T) -> Void) {
-        handler(value)
-        self.handler = handler
     }
 }

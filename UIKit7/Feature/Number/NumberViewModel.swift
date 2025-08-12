@@ -9,19 +9,19 @@ import Foundation
 import UIKit
 
 class NumberViewModel {
-    var text: MyObservable<String?> =  .init(value: "")
-    var outputText: MyObservable<String> = .init(value: "")
-    var outputColor: MyObservable<UIColor> = .init(value: .clear)
+    @MyObservable(value: String?("")) var text
+    @MyObservable(value: "") var outputText
+    @MyObservable(value: UIColor.clear) var outputColor
     
     init() {
         bind()
     }
     
     private func bind() {
-        text.bind { [weak self] in
+        $text.bind { [weak self] in
             guard let output = self?.validate($0) else { return }
-            self?.outputText.wrappedValue = output.0
-            self?.outputColor.wrappedValue = output.1
+            self?.outputText = output.0
+            self?.outputColor = output.1
         }
     }
     

@@ -35,18 +35,18 @@ class NumberViewController: UIViewController {
     }
     
     private func bind() {
-        vm.outputText.bind { [weak self] in
+        vm.$outputText.bind { [weak self] in
             self?.formattedAmountLabel.text = $0
         }
         
-        vm.outputColor.bind { [weak self] in
+        vm.$outputColor.bind { [weak self] in
             self?.formattedAmountLabel.textColor = $0
         }
         
         amountTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
             .compactMap(\.text)
-            .assign(to: \.vm.text.wrappedValue, on: self)
+            .assign(to: \.vm.text, on: self)
             .store(in: &cancellables)
     }
 }

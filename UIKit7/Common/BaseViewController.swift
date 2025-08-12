@@ -8,11 +8,16 @@
 import UIKit
 
 class BaseViewController<ViewModel>: UIViewController {
-    private let viewModel: ViewModel
+    let viewModel: ViewModel
     
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
     }
     
     @available(*, unavailable)

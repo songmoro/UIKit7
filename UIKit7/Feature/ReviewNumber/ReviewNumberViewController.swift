@@ -7,8 +7,11 @@
 
 import UIKit
 import SnapKit
+import Combine
 
 class ReviewNumberViewController: BaseViewController<ReviewNumberViewModel> {
+    private var cancellables = Set<AnyCancellable>()
+    
     private let amountTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "금액 입력"
@@ -36,16 +39,20 @@ class ReviewNumberViewController: BaseViewController<ReviewNumberViewModel> {
         super.viewDidLoad()
         configureUI()
         configureConstraints()
-        configureActions()
         bindData()
     }
     
     func bindData() {
-        
-    }
-    
-    @objc private func amountChanged() {
-        print(#function)
+        amountTextField.publisher(.editingChanged)
+            .compactMap { $0 as? UITextField }
+            .compactMap { [weak self] in
+                return self?.viewModel.validate(input: $0.text)
+            }
+            .sink { [weak self] in
+                self?.formattedAmountLabel.text = $0
+                self?.convertedAmountLabel.text = $0
+            }
+            .store(in: &cancellables)
     }
     
     func showAlert() {
@@ -79,9 +86,5 @@ class ReviewNumberViewController: BaseViewController<ReviewNumberViewModel> {
             make.top.equalTo(formattedAmountLabel.snp.bottom).offset(20)
             make.left.right.equalTo(amountTextField)
         }
-    }
-    
-    private func configureActions() {
-        amountTextField.addTarget(self, action: #selector(amountChanged), for: .editingChanged)
     }
 }
