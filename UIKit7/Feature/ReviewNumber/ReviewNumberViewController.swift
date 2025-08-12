@@ -8,8 +8,7 @@
 import UIKit
 import SnapKit
 
-class ReviewNumberViewController: UIViewController {
-    
+class ReviewNumberViewController: BaseViewController<ReviewNumberViewModel> {
     private let amountTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "금액 입력"
@@ -29,11 +28,12 @@ class ReviewNumberViewController: UIViewController {
         return label
     }()
     
-    let viewModel = ReviewNumberViewModel()
+    override init(viewModel: ReviewNumberViewModel = ReviewNumberViewModel()) {
+        super.init(viewModel: viewModel)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         configureUI()
         configureConstraints()
         configureActions()
@@ -44,45 +44,25 @@ class ReviewNumberViewController: UIViewController {
         
     }
     
-    
     @objc private func amountChanged() {
         print(#function)
     }
     
     func showAlert() {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let alert = UIAlertController(
-            title: nil,
-            message: nil,
-            preferredStyle: .actionSheet)
+        let open = UIAlertAction(title: "확인", style: .default)
+        let delete = UIAlertAction(title: "삭제", style: .destructive)
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
         
-        
-        let open = UIAlertAction(title: "확인", style: .default) { _ in
-           
-        }
-        
-        let delete = UIAlertAction(title: "삭제",
-                                   style: .destructive)
-        
-        let cancel = UIAlertAction(title: "취소",
-                                   style: .cancel)
-        
-        
-        alert.addAction(cancel)
-        alert.addAction(delete)
-        alert.addAction(open)
-        
+        [cancel, delete, open].forEach(alert.addAction)
         
         present(alert, animated: true)
-        
     }
-    
     
     private func configureUI() {
         view.backgroundColor = .white
-        view.addSubview(amountTextField)
-        view.addSubview(formattedAmountLabel)
-        view.addSubview(convertedAmountLabel)
+        [amountTextField, formattedAmountLabel, convertedAmountLabel].forEach(view.addSubview)
     }
     
     private func configureConstraints() {
@@ -91,12 +71,10 @@ class ReviewNumberViewController: UIViewController {
             make.left.right.equalToSuperview().inset(20)
             make.height.equalTo(40)
         }
-        
         formattedAmountLabel.snp.makeConstraints { make in
             make.top.equalTo(amountTextField.snp.bottom).offset(20)
             make.left.right.equalTo(amountTextField)
         }
-        
         convertedAmountLabel.snp.makeConstraints { make in
             make.top.equalTo(formattedAmountLabel.snp.bottom).offset(20)
             make.left.right.equalTo(amountTextField)

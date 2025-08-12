@@ -46,7 +46,7 @@ class NumberViewController: UIViewController {
         amountTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
             .compactMap(\.text)
-            .assign(to: \.vm.text.value, on: self)
+            .assign(to: \.vm.text.wrappedValue, on: self)
             .store(in: &cancellables)
     }
 }

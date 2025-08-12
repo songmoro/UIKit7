@@ -9,9 +9,9 @@ import Foundation
 import UIKit
 
 class NumberViewModel {
-    var text: Observable<String?> = .init(value: "")
-    var outputText: Observable<String> = .init(value: "")
-    var outputColor: Observable<UIColor> = .init(value: .clear)
+    var text: MyObservable<String?> =  .init(value: "")
+    var outputText: MyObservable<String> = .init(value: "")
+    var outputColor: MyObservable<UIColor> = .init(value: .clear)
     
     init() {
         bind()
@@ -20,8 +20,8 @@ class NumberViewModel {
     private func bind() {
         text.bind { [weak self] in
             guard let output = self?.validate($0) else { return }
-            self?.outputText.value = output.0
-            self?.outputColor.value = output.1
+            self?.outputText.wrappedValue = output.0
+            self?.outputColor.wrappedValue = output.1
         }
     }
     
