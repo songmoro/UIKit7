@@ -23,7 +23,7 @@ final class UpbitViewModel {
     
     @MyObservable private(set) var list: [Upbit]
     @MyObservable var inputAction: InputAction
-    @MyObservable var outputAction: OutputAction
+    @MyObservable private(set) var outputAction: OutputAction
     
     init(service: UpbitService = UpbitService(), list: [Upbit] = [], inputAction: InputAction = .none, outputAction: OutputAction = .none) {
         self.service = service

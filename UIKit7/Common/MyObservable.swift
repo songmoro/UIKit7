@@ -18,17 +18,15 @@ final class MyObservable<T> {
         
         func bind(handler: @escaping (T) -> Void) {
             handler(observable.value)
-            self.observable.handler = handler
+            self.observable.handlers.append(handler)
         }
     }
     
-    private var handler: ((T) -> Void)?
+    private var handlers: [(T) -> Void]
     private var value: T
     
     var projectedValue: MyObservable<T>.MyPublisher {
-        get {
-            MyPublisher(observable: self)
-        }
+        MyPublisher(observable: self)
     }
     
     var wrappedValue: T {
@@ -37,11 +35,15 @@ final class MyObservable<T> {
         }
         set {
             self.value = newValue
-            handler?(newValue)
+            
+            handlers.forEach {
+                $0(newValue)
+            }
         }
     }
     
     init(value: T) {
         self.value = value
+        self.handlers = []
     }
 }

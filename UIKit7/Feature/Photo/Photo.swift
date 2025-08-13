@@ -14,6 +14,10 @@ struct Photo: Decodable {
     let height: Int
     let url: String
     let download_url: String
+    
+    var overview: String {
+        "작가: \(author), 해상도: \(width) x \(height)"
+    }
 }
 
 struct PhotoList: Decodable {

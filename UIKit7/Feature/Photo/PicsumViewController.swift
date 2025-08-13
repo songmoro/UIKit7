@@ -10,7 +10,6 @@ import Alamofire
 import Kingfisher
   
 class PicsumViewController: UIViewController {
-     
     private let textField = UITextField()
     private let searchButton = UIButton()
     private let photoImageView = UIImageView()
@@ -18,8 +17,6 @@ class PicsumViewController: UIViewController {
     
     private let listButton = UIButton()
     private let tableView = UITableView()
-     
-    private var photoList: [PhotoList] = []
      
     let viewModel = PhotoViewModel()
     
@@ -29,19 +26,33 @@ class PicsumViewController: UIViewController {
         setupConstraints()
     }
     
-    @objc private func searchButtonTapped() {
-        guard let text = textField.text, let photoId = Int(text), photoId >= 0 && photoId <= 100 else {
-            print("0~100 사이의 숫자를 입력해주세요.")
-            return
+    init() {
+        super.init(nibName: nil, bundle: nil)
+        bind()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func bind() {
+        viewModel.output.$photo.bind { [weak self] photo in
+            guard let photo else { return }
+            self?.updatePhotoInfo(photo)
         }
         
-        PhotoManager.shared.getOnePhoto(id: photoId) { photo in
-            self.updatePhotoInfo(photo)
+        viewModel.output.$photoList.bind { [weak self] photoList in
+            self?.tableView.reloadData()
         }
     }
     
+    @objc private func searchButtonTapped() {
+        viewModel.input.textFieldChanged = textField.text
+        viewModel.input.searchButtonClicked = ()
+    }
+    
     private func updatePhotoInfo(_ photo: Photo) {
-        infoLabel.text = "작가: \(photo.author), 해상도: \(photo.width) x \(photo.height)"
+        infoLabel.text = photo.overview
         
         if let url = URL(string: photo.download_url) {
             photoImageView.kf.setImage(with: url, placeholder: UIImage(systemName: "photo"))
@@ -49,10 +60,7 @@ class PicsumViewController: UIViewController {
     }
     
     @objc private func listButtonTapped() {
-        PhotoManager.shared.getPhotoList { photo in
-            self.photoList = photo
-            self.tableView.reloadData()
-        }
+        viewModel.input.fetchButtonClicked = ()
     }
     
     @objc private func dismissKeyboard() {
@@ -62,7 +70,7 @@ class PicsumViewController: UIViewController {
  
 extension PicsumViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photoList.count
+        return viewModel.output.photoList.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -70,7 +78,7 @@ extension PicsumViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let photo = photoList[indexPath.row]
+        let photo = viewModel.output.photoList[indexPath.row]
         cell.configure(with: photo)
         return cell
     }
@@ -164,5 +172,4 @@ extension PicsumViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
         }
     }
-
 }

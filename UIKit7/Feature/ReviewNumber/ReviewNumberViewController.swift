@@ -42,20 +42,25 @@ class ReviewNumberViewController: BaseViewController<ReviewNumberViewModel> {
         bindData()
     }
     
-    func bindData() {
+    private func bindData() {
         amountTextField.publisher(.editingChanged)
             .compactMap { $0 as? UITextField }
-            .compactMap { [weak self] in
-                return self?.viewModel.validate(input: $0.text)
-            }
+            .map(\.text)
             .sink { [weak self] in
-                self?.formattedAmountLabel.text = $0
-                self?.convertedAmountLabel.text = $0
+                self?.viewModel.input.amount = $0
             }
             .store(in: &cancellables)
+        
+        viewModel.output.$won.bind { [weak self] in
+            self?.formattedAmountLabel.text = $0
+        }
+        
+        viewModel.output.$usd.bind { [weak self] in
+            self?.convertedAmountLabel.text = $0
+        }
     }
     
-    func showAlert() {
+    private func showAlert() {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let open = UIAlertAction(title: "확인", style: .default)
