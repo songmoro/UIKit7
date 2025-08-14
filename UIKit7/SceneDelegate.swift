@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabBarController = UITabBarController()
         
         let nav = UINavigationController()
-        nav.setViewControllers([UIViewController(), PicsumViewController()], animated: true)
+        nav.setViewControllers([UIViewController(), ARCTestViewController()], animated: true)
         tabBarController.setViewControllers([nav], animated: true)
         
         window?.rootViewController = tabBarController
